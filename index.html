@@ -19,6 +19,7 @@
   }
 
   .slider-wrapper {
+    margin-top: 150px;
     position: relative;
     width: 100%;
     max-width: 600px;
@@ -62,6 +63,8 @@
     box-shadow: 0 -4px 16px rgba(0,0,0,0.15);
     transform: translateY(100%);
     transition: transform 0.4s ease;
+    max-height: 35%;
+    overflow-y: auto;
   }
 
   .bottom-panel.active {
@@ -94,6 +97,11 @@
     text-align: left;
   }
 
+  .answers button:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
   .explanation {
     margin-top: 6px;
     font-weight: bold;
@@ -115,57 +123,60 @@
 </div>
 
 <script>
-  // СЛАЙДЕР
-  const images = ["image1.jpg", "image2.jpg", "image3.jpg"];
+  const quizSlides = [
+    {
+      image: "image1.jpg",
+      questions: [
+        { question: "Вопрос 1 для картинки 1", answers: ["A1", "B1", "C1"], correct: 0, explanation: "Пояснение 1" },
+        { question: "Вопрос 2 для картинки 1", answers: ["A2", "B2", "C2"], correct: 1, explanation: "Пояснение 2" },
+        { question: "Вопрос 3 для картинки 1", answers: ["A3", "B3", "C3"], correct: 2, explanation: "Пояснение 3" }
+      ]
+    },
+    {
+      image: "image2.jpg",
+      questions: [
+        { question: "Вопрос 1 для картинки 2", answers: ["A1", "B1", "C1"], correct: 1, explanation: "Пояснение 1" },
+        { question: "Вопрос 2 для картинки 2", answers: ["A2", "B2", "C2"], correct: 0, explanation: "Пояснение 2" },
+        { question: "Вопрос 3 для картинки 2", answers: ["A3", "B3", "C3"], correct: 2, explanation: "Пояснение 3" }
+      ]
+    },
+    {
+      image: "image3.jpg",
+      questions: [
+        { question: "Вопрос 1 для картинки 3", answers: ["A1", "B1", "C1"], correct: 2, explanation: "Пояснение 1" },
+        { question: "Вопрос 2 для картинки 3", answers: ["A2", "B2", "C2"], correct: 0, explanation: "Пояснение 2" },
+        { question: "Вопрос 3 для картинки 3", answers: ["A3", "B3", "C3"], correct: 1, explanation: "Пояснение 3" }
+      ]
+    }
+  ];
+
   let index = 0;
   const sliderImg = document.getElementById("sliderImg");
   const prevBtn = document.getElementById("prevBtn");
   const nextBtn = document.getElementById("nextBtn");
   const sliderWrapper = document.getElementById("sliderWrapper");
-
-  function updateImage() { sliderImg.src = images[index]; }
-  prevBtn.onclick = () => { index = (index - 1 + images.length) % images.length; updateImage(); };
-  nextBtn.onclick = () => { index = (index + 1) % images.length; updateImage(); };
-
-  // ВОПРОСЫ
-  const quiz = [
-    {
-      image: "image1.jpg",
-      question: "Кто изображён на этой стадии эволюции?",
-      answers: ["Австралопитек", "Парантроп", "Хомо хабилис"],
-      correct: 0,
-      explanation: "Австралопитеки — одна из самых ранних групп гомининов."
-    },
-    {
-      image: "image2.jpg",
-      question: "Следующая стадия эволюции?",
-      answers: ["Хомо эректус", "Неандерталец", "Хомо сапиенс"],
-      correct: 1,
-      explanation: "Неандерталец — следующий вид после хомо эректус."
-    },
-    {
-      image: "image3.jpg",
-      question: "Какой вид человекоподобных здесь?",
-      answers: ["Парантроп", "Хомо хабилис", "Австралопитек"],
-      correct: 2,
-      explanation: "Здесь изображён Австралопитек."
-    }
-  ];
-
   const panel = document.getElementById("panel");
   const openPanel = document.getElementById("openPanel");
   const questionsContainer = document.getElementById("questionsContainer");
+
+  function updateSlide() {
+    sliderImg.src = quizSlides[index].image;
+    loadQuestions(index);
+  }
+
+  prevBtn.onclick = () => { index = (index - 1 + quizSlides.length) % quizSlides.length; updateSlide(); };
+  nextBtn.onclick = () => { index = (index + 1) % quizSlides.length; updateSlide(); };
 
   openPanel.onclick = () => {
     panel.classList.toggle("active");
     sliderWrapper.style.transform = panel.classList.contains("active") ? "translateY(-40px)" : "translateY(0)";
     sliderWrapper.style.opacity = panel.classList.contains("active") ? 0.6 : 1;
-    loadQuestions();
+    loadQuestions(index);
   };
 
-  function loadQuestions() {
+  function loadQuestions(slideIndex) {
     questionsContainer.innerHTML = "";
-    quiz.forEach((q, qi) => {
+    quizSlides[slideIndex].questions.forEach(q => {
       const block = document.createElement("div");
       block.className = "question-block";
 
@@ -180,6 +191,7 @@
         const btn = document.createElement("button");
         btn.textContent = ans;
         btn.onclick = () => {
+          Array.from(answersDiv.children).forEach(b => b.disabled = true);
           if (ai === q.correct) btn.style.backgroundColor = "#8BC34A";
           else btn.style.backgroundColor = "#F44336";
 
@@ -195,6 +207,8 @@
       questionsContainer.appendChild(block);
     });
   }
+
+  updateSlide();
 </script>
 
 </body>
