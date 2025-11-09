@@ -78,6 +78,10 @@
     cursor: pointer;
   }
 
+  .question-block {
+    margin-bottom: 16px;
+  }
+
   .answers button {
     display: block;
     width: 100%;
@@ -87,10 +91,11 @@
     border: 1px solid #ccc;
     cursor: pointer;
     background: #fafafa;
+    text-align: left;
   }
 
-  .result {
-    margin-top: 10px;
+  .explanation {
+    margin-top: 6px;
     font-weight: bold;
   }
 </style>
@@ -103,94 +108,92 @@
   <span class="arrow right" id="nextBtn">❯</span>
 </div>
 
-<button class="open-panel-btn" id="openPanel">Открыть вопрос</button>
+<button class="open-panel-btn" id="openPanel">Открыть вопросы</button>
 
 <div class="bottom-panel" id="panel">
-  <div id="questionText">Ваш вопрос будет здесь</div>
-  <div class="answers" id="answers"></div>
-  <div class="result" id="result"></div>
+  <div id="questionsContainer"></div>
 </div>
 
 <script>
-  // СЛАЙДЕР — впишите свои картинки
-  const images = [
-    "image1.jpg",
-    "image2.jpg",
-    "image3.jpg"
-  ];
-
+  // СЛАЙДЕР
+  const images = ["image1.jpg", "image2.jpg", "image3.jpg"];
   let index = 0;
-
   const sliderImg = document.getElementById("sliderImg");
   const prevBtn = document.getElementById("prevBtn");
   const nextBtn = document.getElementById("nextBtn");
   const sliderWrapper = document.getElementById("sliderWrapper");
 
-  function updateImage() {
-    sliderImg.src = images[index];
-  }
+  function updateImage() { sliderImg.src = images[index]; }
+  prevBtn.onclick = () => { index = (index - 1 + images.length) % images.length; updateImage(); };
+  nextBtn.onclick = () => { index = (index + 1) % images.length; updateImage(); };
 
-  prevBtn.onclick = () => {
-    index = (index - 1 + images.length) % images.length;
-    updateImage();
-  };
-
-  nextBtn.onclick = () => {
-    index = (index + 1) % images.length;
-    updateImage();
-  };
-
-  // ВОПРОСЫ — ВПИШИТЕ СВОИ ДАННЫЕ
+  // ВОПРОСЫ
   const quiz = [
     {
+      image: "image1.jpg",
       question: "Кто изображён на этой стадии эволюции?",
       answers: ["Австралопитек", "Парантроп", "Хомо хабилис"],
       correct: 0,
       explanation: "Австралопитеки — одна из самых ранних групп гомининов."
+    },
+    {
+      image: "image2.jpg",
+      question: "Следующая стадия эволюции?",
+      answers: ["Хомо эректус", "Неандерталец", "Хомо сапиенс"],
+      correct: 1,
+      explanation: "Неандерталец — следующий вид после хомо эректус."
+    },
+    {
+      image: "image3.jpg",
+      question: "Какой вид человекоподобных здесь?",
+      answers: ["Парантроп", "Хомо хабилис", "Австралопитек"],
+      correct: 2,
+      explanation: "Здесь изображён Австралопитек."
     }
   ];
 
-  let currentQuestion = 0;
-
   const panel = document.getElementById("panel");
   const openPanel = document.getElementById("openPanel");
-  const questionText = document.getElementById("questionText");
-  const answersBox = document.getElementById("answers");
-  const resultBox = document.getElementById("result");
+  const questionsContainer = document.getElementById("questionsContainer");
 
   openPanel.onclick = () => {
     panel.classList.toggle("active");
-    sliderWrapper.style.transform = panel.classList.contains("active")
-      ? "translateY(-40px)"
-      : "translateY(0)";
+    sliderWrapper.style.transform = panel.classList.contains("active") ? "translateY(-40px)" : "translateY(0)";
     sliderWrapper.style.opacity = panel.classList.contains("active") ? 0.6 : 1;
-
-    loadQuestion();
+    loadQuestions();
   };
 
-  function loadQuestion() {
-    const q = quiz[currentQuestion];
-    questionText.textContent = q.question;
-    answersBox.innerHTML = "";
-    resultBox.textContent = "";
+  function loadQuestions() {
+    questionsContainer.innerHTML = "";
+    quiz.forEach((q, qi) => {
+      const block = document.createElement("div");
+      block.className = "question-block";
 
-    q.answers.forEach((ans, i) => {
-      const btn = document.createElement("button");
-      btn.textContent = ans;
-      btn.onclick = () => checkAnswer(i);
-      answersBox.appendChild(btn);
+      const questionText = document.createElement("div");
+      questionText.textContent = q.question;
+      block.appendChild(questionText);
+
+      const answersDiv = document.createElement("div");
+      answersDiv.className = "answers";
+
+      q.answers.forEach((ans, ai) => {
+        const btn = document.createElement("button");
+        btn.textContent = ans;
+        btn.onclick = () => {
+          if (ai === q.correct) btn.style.backgroundColor = "#8BC34A";
+          else btn.style.backgroundColor = "#F44336";
+
+          const exp = document.createElement("div");
+          exp.className = "explanation";
+          exp.textContent = q.explanation;
+          answersDiv.appendChild(exp);
+        };
+        answersDiv.appendChild(btn);
+      });
+
+      block.appendChild(answersDiv);
+      questionsContainer.appendChild(block);
     });
-  }
-
-  function checkAnswer(i) {
-    const q = quiz[currentQuestion];
-    if (i === q.correct) {
-      resultBox.textContent = "Верно! " + q.explanation;
-      resultBox.style.color = "green";
-    } else {
-      resultBox.textContent = "Неверно. " + q.explanation;
-      resultBox.style.color = "red";
-    }
   }
 </script>
 
